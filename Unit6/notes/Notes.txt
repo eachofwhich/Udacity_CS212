@@ -1,0 +1,151 @@
+
+Unit 6. 05/27/2012
+
+
+
+
+
+			Game of Scrabble.
+
+				Concept Inventory:
+
+					Board					2D Array
+					Letters					str
+					Words					str
+					Hand					str
+					Legal Play				fn(pos, direction, "ritzy")
+					Score					fn
+					Letter Score			{'z': 10}
+					Play					fn
+					Bonus					pos -> DW or TL or ...
+					Dictionary				set(words)
+					Blank					str: ' ' or '_'
+
+
+
+
+
+	[6-5]
+			Regression Tests.
+				We have a test that does not conclusively prove the correctness of code, but we use it to
+				refine our code. As we refactor or optimize the code, the test will tell us whether we changed
+				the semantics or not.
+
+
+
+			It's important to pace your work on the problem. Split it up into digestible bits, and one on them one
+			at a time.
+
+
+
+
+
+			First we implement find_words(hand) that finds words in dictionary that could me made out of letters in hand.
+
+			We iterate over each letter and the rest of hand, getting permutations, and check of the curent word is in dictionary.
+			That is a very slow approach. To speed it up, we will build a set of prefixes of each word, and stop iteration if the 
+			current word is not in the prefixes set.
+
+				if letter1 + letter2 not in prefixes: continue
+
+
+			Recursive find_words():
+
+				def find_words(hand):
+					"""Return a set of words composed of letters in hand and found in DICTIONARY"""
+
+					result = set()
+
+					def expand_prefixes(word, hand):
+						if word and word in DICTIONARY: result.add(word)
+						# if the current word will never lead to a real word found in DICTIONARY, stop expanding.
+						if word and word not in PREFIXES: return None
+
+						# try expanding the current word combined with the remaining letters in hand.
+						for letter in hand:
+							hand = hand.replace(letter, '', 1)
+							extend_prefixes(word + letter, hand)
+						
+
+					expand_prefixes('', hand)
+					return result
+
+
+
+
+
+			Given certain letters on the board, we look for words that could be made out of the letters in hand, combined
+			with each of the letters on the board. prefix + letter + suffix in DICTIONARY.
+
+				def word_play(hand, board_letters):
+					results = set()
+
+					for prefix in expand_prefixes('', hand):
+						for letter in board_letters:
+							add_suffixes( removed(hand, prefixes), prefixes + letter, result )
+
+					return results
+
+
+
+				def add_suffixes(hand, prefix, results = None):
+					results = results or set()
+
+					if prefix in WORDS: results.add(prefix)
+					if not hand: return results
+
+					for letter in hand:
+						current_word = prefix + letter
+						add_suffixes(hand.replace(letter, '', 1), current_word, results)
+
+					return results
+
+
+			Now we have tackled two milestones: generating legal words, and generating word plays for letters on the board.
+
+
+
+
+
+			Representing rows and columns.
+
+				Row:
+							---------------------------------------------
+							|$	|J	|	|	|	|	|	|	|	|	|	|
+							---------------------------------------------
+							|$	|A	|*	|*	|.	|*	|B	|C	|.	|.	|$	|
+							---------------------------------------------
+							|$	|G	|U	|Y	|	|	|	|	|	|	|	|
+							---------------------------------------------
+
+							$ - border. We'll pad each row with border elements to signify row borders.
+							* - anchor. Anchors are where the next word can start or continue.
+							. - empty cell.
+
+
+				An anchor is a set of intersecting letters that the row and the cross-column share.
+						class Anchor(set): pass
+
+
+
+
+	[6-18 explains how we fill in a row]
+
+
+
+			We define more functions:
+
+
+				row_plays(hand, row) -> {(pos, word)}
+
+
+				horizontal_plays(hand, board) -> { (i_col, i_row), word }
+
+
+				all_plays(hand, board) -> { ( (i_col, i_row), DIRECTION, word ) }
+				
+						Return union of horizontal_plays and verical_plays.
+
+
+				We do not need to define a dedicated vertical_plays() function. Instead, we transpose the board, and
+				use horizontal_plays().

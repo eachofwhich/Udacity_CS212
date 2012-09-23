@@ -1,0 +1,31 @@
+
+
+Editor tricks:
+
+* finds the next matching word.
+
+Command-D finds the next matching word.
+
+Command-Click adds nother cursor.
+
+Command-Control-F finds and highlights all matches for a word.
+
+
+
+
+---
+
+
+Runnings things:
+		
+		Study methodology.
+		Study Plan.
+
+Focus Areas:
+		Job.
+		Vesselo.
+		Health.
+		Study.
+		Events.
+		Fun.
+		Personal Development.
